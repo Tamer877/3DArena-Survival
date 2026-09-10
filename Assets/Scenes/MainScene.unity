@@ -799,6 +799,8 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 64
   muzzlePoint: {fileID: 1971480480}
+  hitEffectPrefab: {fileID: 6289469923123518592, guid: a939c2f528aa2c349b581e2cf1b3e277, type: 3}
+  effectPoolSize: 10
 --- !u!1 &1603268299
 GameObject:
   m_ObjectHideFlags: 0
