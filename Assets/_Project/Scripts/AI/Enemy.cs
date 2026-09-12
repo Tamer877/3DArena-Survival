@@ -1,6 +1,7 @@
 using UnityEngine;
 using UnityEngine.AI;
 using ArenaSurvival.Characters;
+using ArenaSurvival.Core;
 
 namespace ArenaSurvival.AI
 {
@@ -13,7 +14,7 @@ namespace ArenaSurvival.AI
         [SerializeField] private float attackRate = 1f;
 
         [Header("Vision (Dot Product)")]
-        [SerializeField] private float viewAngle = 90f; // Toplam açı (45 sağ, 45 sol)
+        [SerializeField] private float viewAngle = 90f;
 
         public NavMeshAgent Agent { get; private set; }
         public Transform Target { get; private set; }
@@ -26,27 +27,36 @@ namespace ArenaSurvival.AI
         public float AttackRate => attackRate;
         public float AttackDamage => attackDamage;
 
+        private ObjectPool<Enemy> _originPool;
+
         protected override void Awake()
         {
             base.Awake();
             Agent = GetComponent<NavMeshAgent>();
 
-            // FSM kurulumu
             StateMachine = new StateMachine();
             ChaseState = new ChaseState(this);
             AttackState = new AttackState(this);
         }
 
-        private void Start()
+        public void Init(ObjectPool<Enemy> pool, Transform targetTransform)
         {
-            // Oyuncuyu dinamik bul
-            Player player = FindFirstObjectByType<Player>();
-            if (player != null)
+            _originPool = pool;
+            Target = targetTransform;
+            ResetEnemy();
+        }
+
+        public void ResetEnemy()
+        {
+            CurrentHealth = maxHealth;
+            IsDead = false;
+
+            if (Agent != null)
             {
-                Target = player.transform;
+                Agent.isStopped = false;
             }
 
-            StateMachine.ChangeState(ChaseState);
+            StateMachine?.ChangeState(ChaseState);
         }
 
         private void Update()
@@ -55,15 +65,12 @@ namespace ArenaSurvival.AI
             StateMachine.Update();
         }
 
-        // Mülakatlarda sorulan Dot Product ile görüş konisi kontrolü
         public bool IsTargetInFieldOfView()
         {
             if (Target == null) return false;
 
             Vector3 directionToTarget = (Target.position - transform.position).normalized;
             float dotProduct = Vector3.Dot(transform.forward, directionToTarget);
-
-            // Açının yarısının kosinüsü sınır eşiğimizdir
             float viewThreshold = Mathf.Cos((viewAngle * 0.5f) * Mathf.Deg2Rad);
 
             return dotProduct >= viewThreshold;
@@ -72,8 +79,20 @@ namespace ArenaSurvival.AI
         protected override void Die()
         {
             base.Die();
-            Agent.isStopped = true;
-            gameObject.SetActive(false); // İleride ObjectPool ile havuza dönecek
+
+            if (Agent != null && Agent.isOnNavMesh)
+            {
+                Agent.isStopped = true;
+            }
+
+            if (_originPool != null)
+            {
+                _originPool.ReturnToPool(this);
+            }
+            else
+            {
+                gameObject.SetActive(false);
+            }
         }
     }
 }
