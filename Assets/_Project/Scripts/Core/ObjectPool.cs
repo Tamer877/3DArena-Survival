@@ -30,7 +30,7 @@ namespace ArenaSurvival.Core
 
         public T Get()
         {
-            T obj = _poolQueue.Count > 0 ? _poolQueue.Dequeue() : CreateNewObject();
+            T obj = _poolQueue.Count > 0 ? _poolQueue.Dequeue() : CreateNewObject(); // havuz yetmezse otomatik büyü
             obj.gameObject.SetActive(true);
             return obj;
         }

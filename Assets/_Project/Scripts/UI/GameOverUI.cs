@@ -59,7 +59,6 @@ namespace ArenaSurvival.UI
 
         private void RestartGame()
         {
-            // Aktif sahneyi yeniden yükle
             SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
         }
     }

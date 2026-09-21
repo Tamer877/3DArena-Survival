@@ -36,7 +36,7 @@ namespace ArenaSurvival.AI
 
             StateMachine = new StateMachine();
             ChaseState = new ChaseState(this);
-            AttackState = new AttackState(this);
+            AttackState = new AttackState(this); // her enemy kendi state instance'larına sahip
         }
 
         public void Init(ObjectPool<Enemy> pool, Transform targetTransform)
@@ -71,7 +71,7 @@ namespace ArenaSurvival.AI
 
             Vector3 directionToTarget = (Target.position - transform.position).normalized;
             float dotProduct = Vector3.Dot(transform.forward, directionToTarget);
-            float viewThreshold = Mathf.Cos((viewAngle * 0.5f) * Mathf.Deg2Rad);
+            float viewThreshold = Mathf.Cos((viewAngle * 0.5f) * Mathf.Deg2Rad); // Vector3.Angle yerine dot product: arccos hesabı yok
 
             return dotProduct >= viewThreshold;
         }
@@ -80,7 +80,7 @@ namespace ArenaSurvival.AI
         {
             base.Die();
 
-            if (Agent != null && Agent.isOnNavMesh)
+            if (Agent != null && Agent.isOnNavMesh) // isOnNavMesh kontrolü olmadan exception alabiliriz
             {
                 Agent.isStopped = true;
             }

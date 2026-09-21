@@ -13,8 +13,7 @@ namespace ArenaSurvival.Characters
         public float MaxHealth => maxHealth;
         public bool IsDead { get; protected set; }
 
-        // Observer pattern için can değişim event'leri (UI doğrudan buna bağlanacak)
-        public event Action<float, float> OnHealthChanged; // (current, max)
+        public event Action<float, float> OnHealthChanged;
         public event Action OnDeath;
 
         protected virtual void Awake()
@@ -38,7 +37,7 @@ namespace ArenaSurvival.Characters
 
         protected virtual void Die()
         {
-            if (IsDead) return;
+            if (IsDead) return; // çift ölüm olmasın
 
             IsDead = true;
             OnDeath?.Invoke();

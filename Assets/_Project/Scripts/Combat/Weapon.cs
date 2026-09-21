@@ -25,7 +25,6 @@ namespace ArenaSurvival.Combat
         {
             if (hitEffectPrefab != null)
             {
-                // Efektler için sahnede hiyerarşiyi kirletmeyecek bir parent oluşturuyoruz
                 GameObject poolContainer = new GameObject($"{hitEffectPrefab.name}_Pool");
                 _effectPool = new ObjectPool<PooledEffect>(hitEffectPrefab, effectPoolSize, poolContainer.transform);
             }
@@ -38,13 +37,13 @@ namespace ArenaSurvival.Combat
             _nextFireTime = Time.time + fireRate;
 
             Vector3 shootOrigin = muzzlePoint != null ? muzzlePoint.position : transform.position;
-            Vector3 shootDirection = muzzlePoint != null ? muzzlePoint.forward : transform.forward;
+            Vector3 shootDirection = muzzlePoint != null ? muzzlePoint.forward : transform.forward; // muzzlePoint atanmamışsa fallback
 
             if (Physics.Raycast(shootOrigin, shootDirection, out RaycastHit hitInfo, range, hitLayers))
             {
                 if (hitInfo.collider.TryGetComponent<IDamageable>(out IDamageable target))
                 {
-                    target.TakeDamage(damage);
+                    target.TakeDamage(damage); // Player mı Enemy mi bilmiyoruz, IDamageable yeterli
                 }
 
                 SpawnHitEffect(hitInfo.point, Quaternion.LookRotation(hitInfo.normal));
@@ -55,7 +54,7 @@ namespace ArenaSurvival.Combat
                 Debug.DrawLine(shootOrigin, shootOrigin + shootDirection * range, Color.yellow, 0.5f);
             }
         }
-
+        
         private void SpawnHitEffect(Vector3 position, Quaternion rotation)
         {
             if (_effectPool == null) return;

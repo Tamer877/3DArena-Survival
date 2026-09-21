@@ -27,7 +27,6 @@ namespace ArenaSurvival.UI
 
         private void OnEnable()
         {
-            // Event abonelikleri (Observer Pattern)
             if (_player != null)
             {
                 _player.OnHealthChanged += UpdateHealthUI;
@@ -42,7 +41,6 @@ namespace ArenaSurvival.UI
 
         private void OnDisable()
         {
-            // Bellek sızıntısını (Memory Leak) önlemek için abonelikten çıkış
             if (_player != null)
             {
                 _player.OnHealthChanged -= UpdateHealthUI;
@@ -51,16 +49,15 @@ namespace ArenaSurvival.UI
             if (_waveManager != null)
             {
                 _waveManager.OnWaveStarted -= UpdateWaveUI;
-                _waveManager.OnEnemiesRemainingChanged -= UpdateEnemiesRemainingUI;
+                _waveManager.OnEnemiesRemainingChanged -= UpdateEnemiesRemainingUI; // unsubscribe zorunlu, yoksa memory leak
             }
         }
 
         private void Start()
         {
-            // Başlangıç değerlerini eşitle
             if (_player != null)
             {
-                UpdateHealthUI(_player.CurrentHealth, _player.MaxHealth);
+                UpdateHealthUI(_player.CurrentHealth, _player.MaxHealth); // event gelene kadar slider boş kalmasın
             }
         }
 

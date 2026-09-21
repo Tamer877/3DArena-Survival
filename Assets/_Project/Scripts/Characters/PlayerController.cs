@@ -21,7 +21,7 @@ namespace ArenaSurvival.Characters
             _rb = GetComponent<Rigidbody>();
             _mainCamera = Camera.main;
 
-            // Fizik motoru kaynaklı devrilmeleri önlemek için rotasyon eksenlerini kilitliyoruz
+            // rotasyonu fizik motoru değil biz yöneteceğiz
             _rb.freezeRotation = true;
         }
 
@@ -39,12 +39,9 @@ namespace ArenaSurvival.Characters
 
         private void ReadMovementInput()
         {
-            // Basit ve temiz girdi okuma (Legacy input veya yeni input wrapper bağlanabilir)
             float horizontal = Input.GetAxisRaw("Horizontal");
             float vertical = Input.GetAxisRaw("Vertical");
-
-            // Çapraz yürürken hızın 1.41 katına çıkmaması için normalize ediyoruz
-            _movementInput = new Vector3(horizontal, 0f, vertical).normalized;
+            _movementInput = new Vector3(horizontal, 0f, vertical).normalized; // normalize: çapraz gidince hız artmasın
         }
 
         private void CalculateAimPoint()
@@ -59,6 +56,7 @@ namespace ArenaSurvival.Characters
 
         private void ApplyMovement()
         {
+            // MovePosition çarpışmaları korur, transform.position dogrudan atamak korumaz
             Vector3 targetPosition = _rb.position + _movementInput * (moveSpeed * Time.fixedDeltaTime);
             _rb.MovePosition(targetPosition);
         }
@@ -66,9 +64,9 @@ namespace ArenaSurvival.Characters
         private void ApplyRotation()
         {
             Vector3 lookDirection = _aimPoint - _rb.position;
-            lookDirection.y = 0f; // Sadece yatay eksende dönme
+            lookDirection.y = 0f;
 
-            if (lookDirection.sqrMagnitude > 0.001f)
+            if (lookDirection.sqrMagnitude > 0.001f) // sıfır vektörde LookRotation NaN üretir
             {
                 Quaternion targetRotation = Quaternion.LookRotation(lookDirection);
                 _rb.MoveRotation(targetRotation);

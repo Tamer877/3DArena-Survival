@@ -16,8 +16,6 @@ namespace ArenaSurvival.Characters
         protected override void Die()
         {
             base.Die();
-            
-            // Karakter öldüğünde kontrolleri kapatıyoruz
             _controller.enabled = false;
             Debug.Log("[Player] Oyuncu öldü. Game Over tetiklenebilir.");
         }

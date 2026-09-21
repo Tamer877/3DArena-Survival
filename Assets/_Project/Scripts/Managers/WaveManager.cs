@@ -28,7 +28,6 @@ namespace ArenaSurvival.Managers
         public int CurrentWave { get; private set; } = 0;
         public int ActiveEnemyCount { get; private set; } = 0;
 
-        // Observer Pattern Event'leri (7. Adımdaki UI buna bağlanacak)
         public event Action<int> OnWaveStarted;
         public event Action<int> OnEnemiesRemainingChanged;
 
@@ -38,6 +37,7 @@ namespace ArenaSurvival.Managers
             {
                 GameObject poolContainer = new GameObject("Enemy_Pool");
                 _enemyPool = new ObjectPool<Enemy>(enemyPrefab, initialPoolSize, poolContainer.transform);
+                // pool nesneleri hierarchy'yi kirletmesin diye ayrı bir parent altında tutuyoruz
             }
         }
 
@@ -63,7 +63,7 @@ namespace ArenaSurvival.Managers
                 OnWaveStarted?.Invoke(CurrentWave);
                 Debug.Log($"[WaveManager] Dalga {CurrentWave} Başladı!");
 
-                // Formül: Her dalgada düşman sayısı artar
+                // +3: her dalgada biraz daha zorlaşıyor
                 int enemiesToSpawn = baseEnemyCount + (CurrentWave - 1) * 3;
                 ActiveEnemyCount = enemiesToSpawn;
                 OnEnemiesRemainingChanged?.Invoke(ActiveEnemyCount);
@@ -74,10 +74,9 @@ namespace ArenaSurvival.Managers
                     yield return new WaitForSeconds(spawnInterval);
                 }
 
-                // Tüm düşmanlar ölene kadar bekle
                 while (ActiveEnemyCount > 0)
                 {
-                    yield return null;
+                    yield return null; // her frame kontrol et, UI bunu güncelliyor zaten
                 }
 
                 Debug.Log($"[WaveManager] Dalga {CurrentWave} Temizlendi! Yeni dalga bekleniyor...");
@@ -89,11 +88,9 @@ namespace ArenaSurvival.Managers
         {
             if (_enemyPool == null || spawnPoints.Length == 0) return;
 
-            // Rastgele bir spawn noktası seç
             Transform randomPoint = spawnPoints[UnityEngine.Random.Range(0, spawnPoints.Length)];
             Vector3 spawnPos = randomPoint.position;
 
-            // NavMesh üzerinde geçerli en yakın noktayı bul
             if (NavMesh.SamplePosition(spawnPos, out NavMeshHit hit, 2.0f, NavMesh.AllAreas))
             {
                 spawnPos = hit.position;
@@ -101,7 +98,7 @@ namespace ArenaSurvival.Managers
 
             Enemy enemy = _enemyPool.Get();
 
-            // NavMeshAgent'ı doğru konuma taşımak için Warp kullanmak en güvenli yoldur
+            // Warp: transform.position'a doğrudan atama NavMesh senkronizasyonunu bozar
             if (enemy.Agent != null)
             {
                 enemy.Agent.Warp(spawnPos);
@@ -113,10 +110,9 @@ namespace ArenaSurvival.Managers
 
             enemy.Init(_enemyPool, _playerTransform);
 
-            // Düşman öldüğünde kalan sayacı düşürmek için event dinle
             void HandleEnemyDeath()
             {
-                enemy.OnDeath -= HandleEnemyDeath;
+                enemy.OnDeath -= HandleEnemyDeath; // tek seferlik, kendini çıkar
                 ActiveEnemyCount--;
                 OnEnemiesRemainingChanged?.Invoke(ActiveEnemyCount);
             }

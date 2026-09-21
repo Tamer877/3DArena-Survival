@@ -22,7 +22,6 @@ namespace ArenaSurvival.AI
 
             _enemy.Agent.SetDestination(_enemy.Target.position);
 
-            // Saldırı mesafesine girdi mi?
             float distance = Vector3.Distance(_enemy.transform.position, _enemy.Target.position);
             if (distance <= _enemy.AttackRange)
             {
