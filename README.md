@@ -87,11 +87,3 @@ Assets/
 
 ---
 
-## How to Run
-1. Clone the repository:
-   ```bash
-   git clone <REPO_URL>
-   ```
-2. Open the project in Unity (URP compatible).
-3. Open `Assets/_Project/Scenes/MainArena.unity` (or your active scene).
-4. Hit **Play**. Use **WASD** to move, **Mouse Cursor** to aim, and **Left Mouse Button** to fire.
